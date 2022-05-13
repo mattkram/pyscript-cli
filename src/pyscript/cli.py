@@ -4,6 +4,8 @@ import webbrowser
 from pathlib import Path
 from typing import Any, Optional
 
+import requests
+
 from pyscript._generator import file_to_html, string_to_html
 
 try:
@@ -108,3 +110,21 @@ def wrap(
     if remove_output:
         time.sleep(1)
         output.unlink()
+
+
+@app.command()
+def upload(
+    filename: Path,
+    name: str = typer.Option(..., "--name", "-n"),
+    description: str = typer.Option(..., "--description", "-d"),
+) -> None:
+    console.print(f"Preparing to upload {filename}")
+
+    with filename.open("rb") as fp:
+        response = requests.post(
+            "http://localhost:8000/api/projects/upload",
+            data={"name": name, "description": description},
+            files={"file": (filename.name, fp, "text/html")},
+        )
+
+    console.print(response.json())
