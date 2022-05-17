@@ -117,14 +117,19 @@ def upload(
     filename: Path,
     name: str = typer.Option(..., "--name", "-n"),
     description: str = typer.Option(..., "--description", "-d"),
+    url: str = typer.Option("https://latest.dev.anaconda.cloud/hackdays/pyscript"),
 ) -> None:
     console.print(f"Preparing to upload {filename}")
 
     with filename.open("rb") as fp:
         response = requests.post(
-            "http://localhost:8000/api/projects/upload",
+            f"{url}/api/projects/upload",
             data={"name": name, "description": description},
             files={"file": (filename.name, fp, "text/html")},
         )
 
     console.print(response.json())
+    console.print()
+
+    url = response.json()["url"]
+    console.print(f"Here is a link to your project: [link={url}]{url}[/link]\n")
